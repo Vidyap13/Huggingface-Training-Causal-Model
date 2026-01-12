@@ -1,4 +1,4 @@
-# CodeParrot-DS: Causal Language Model from Scratch
+# Causal Language Model from Scratch
 
 This project demonstrates training a GPT-2 Language Model from scratch specifically for Python data science code generation. Unlike fine-tuning, this workflow starts with a randomly initialized model and trains it to understand the syntax and logic of libraries like **pandas**, **matplotlib**, and **scikit-learn**.
 
