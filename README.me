@@ -1,1 +1,109 @@
-getting started
+# Causal Language Model from Scratch: CodeParrot-DS
+
+This repository contains a complete implementation for training a **GPT-2 language model from scratch** to generate **Python data science code**. The project focuses on building a causal language model that understands and completes code snippets involving popular libraries such as **pandas**, **scikit-learn**, and **matplotlib**.
+
+The implementation follows the **Hugging Face LLM Course** curriculum and demonstrates both high-level and low-level training workflows.
+
+---
+
+## 🚀 Project Overview
+
+The goal of this project is to build a **specialized code assistant** trained entirely from scratch.  
+Unlike fine-tuning, the model:
+
+- Starts from a **randomly initialized GPT-2 configuration**
+- Learns its **tokenization, syntax, and semantics** purely from the dataset
+- Is optimized specifically for **data science–oriented Python code**
+
+---
+
+## ✨ Key Features
+
+- **Custom Data Filtering**  
+  Pre-processed the CodeParrot dataset to include only scripts containing data science–related keywords.
+
+- **Optimized Tokenization**  
+  Utilized a fast **Byte Pair Encoding (BPE)** tokenizer with parallel processing for large-scale code data.
+
+- **Weighted Loss Function**  
+  Implemented a custom `CrossEntropyLoss` that penalizes errors more heavily for critical tokens such as:
+  - `fit`
+  - `predict`
+  - `plt`
+  - `pd`
+
+- **Dual Training Workflows**
+  - High-level training using the **Hugging Face Trainer API**
+  - Low-level custom training loop using **Hugging Face Accelerate**
+
+---
+
+## 🛠️ Technical Stack
+
+- **Language:** Python  
+- **Deep Learning Framework:** PyTorch  
+- **Distributed Training:** Hugging Face Accelerate  
+- **Dataset:** `huggingface-course/codeparrot-ds-train`  
+- **Model Architecture:** GPT-2 (124M parameters)
+
+---
+
+## 📖 Implementation Details
+
+### 1️⃣ Data Pipeline
+
+- Dataset is **streamed and filtered** to retain only relevant Python data science code.
+- Context length is set to **128 tokens**.
+- Used `return_overflowing_tokens=True` to avoid losing data during truncation.
+
+---
+
+### 2️⃣ Custom Weighted Loss
+
+To bias the model toward important data science operations, token-level weights are applied when specific keywords appear in the input sequence.
+
+**Weighted Loss Formula:**
+
+\[
+\text{weighted\_loss} = \alpha \times (1.0 + \text{weights}) \times \text{loss\_per\_token}
+\]
+
+This encourages the model to better learn library usage and common ML workflows.
+
+---
+
+### 3️⃣ Training Strategy
+
+Two training approaches are implemented:
+
+#### 🔹 Hugging Face Trainer
+- Automatic handling of:
+  - Training loop
+  - Logging
+  - Evaluation
+- Faster experimentation and cleaner code
+
+#### 🔹 Accelerate Training Loop
+- Full manual control over:
+  - Gradient accumulation (8 steps)
+  - Device placement
+  - Gradient clipping
+- Ideal for understanding the internals of large-scale training
+
+---
+
+## 📊 Results
+
+The model was evaluated using **Perplexity**, a standard metric for language models.
+
+- **Pre-training Perplexity:** ~59,413  
+- **Post-training Perplexity:**  
+  Significantly reduced after just **0.01 epochs** of training
+
+---
+
+## 🧪 Sample Inference
+
+**Prompt:**
+```python
+# create scatter plot with x, y
