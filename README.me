@@ -1,109 +1,68 @@
-# Causal Language Model from Scratch: CodeParrot-DS
+Causal Language Model from Scratch: CodeParrot-DS
+This project involves training a GPT-2 Language Model from scratch specifically for Python data science code generation. Unlike fine-tuning, this workflow starts with a randomly initialized model and trains it to understand the syntax and logic of libraries like pandas, matplotlib, and scikit-learn.
 
-This repository contains a complete implementation for training a **GPT-2 language model from scratch** to generate **Python data science code**. The project focuses on building a causal language model that understands and completes code snippets involving popular libraries such as **pandas**, **scikit-learn**, and **matplotlib**.
+🚀 Overview
+The project follows a rigorous NLP pipeline including custom data filtering, tokenization of code, and a specialized training loop using Hugging Face Accelerate.
 
-The implementation follows the **Hugging Face LLM Course** curriculum and demonstrates both high-level and low-level training workflows.
+Key Features
+Data Science Focus: Scripts are filtered based on the presence of specific library keywords.
 
----
+Custom Tokenization: Utilizes the code-search-net-tokenizer with parallel processing for efficiency.
 
-## 🚀 Project Overview
+Weighted Loss: Implements a custom loss function that prioritizes high-value tokens like plt, pd, and fit.
 
-The goal of this project is to build a **specialized code assistant** trained entirely from scratch.  
-Unlike fine-tuning, the model:
+Performance Optimization: Features gradient accumulation and mixed-precision compatibility through the Accelerator.
 
-- Starts from a **randomly initialized GPT-2 configuration**
-- Learns its **tokenization, syntax, and semantics** purely from the dataset
-- Is optimized specifically for **data science–oriented Python code**
+🛠️ Technical Stack
+Language: Python
 
----
+Framework: PyTorch
 
-## ✨ Key Features
+Libraries: transformers, datasets, accelerate, evaluate
 
-- **Custom Data Filtering**  
-  Pre-processed the CodeParrot dataset to include only scripts containing data science–related keywords.
+Model: GPT-2 (Causal LM)
 
-- **Optimized Tokenization**  
-  Utilized a fast **Byte Pair Encoding (BPE)** tokenizer with parallel processing for large-scale code data.
+📖 Project Workflow
+1. Data Preprocessing
+The dataset is processed into fixed-length chunks of 128 tokens. Using return_overflowing_tokens, we ensure that code snippets are not simply truncated but broken into meaningful sequences.
 
-- **Weighted Loss Function**  
-  Implemented a custom `CrossEntropyLoss` that penalizes errors more heavily for critical tokens such as:
-  - `fit`
-  - `predict`
-  - `plt`
-  - `pd`
+2. Model Configuration
+The model is initialized with a custom AutoConfig rather than pre-trained weights:
 
-- **Dual Training Workflows**
-  - High-level training using the **Hugging Face Trainer API**
-  - Low-level custom training loop using **Hugging Face Accelerate**
+Activation: GELU
 
----
+Context Length: 128
 
-## 🛠️ Technical Stack
+Parameters: ~124.2M
 
-- **Language:** Python  
-- **Deep Learning Framework:** PyTorch  
-- **Distributed Training:** Hugging Face Accelerate  
-- **Dataset:** `huggingface-course/codeparrot-ds-train`  
-- **Model Architecture:** GPT-2 (124M parameters)
+3. Custom Key-Token Weighted Loss
+To ensure the model prioritizes the most important data science syntax, we implemented a weighted Cross-Entropy loss. This mathematically scales the loss for specific "key tokens" (like pd or predict), forcing the model to learn these critical identifiers more accurately during the early stages of training.
 
----
+4. Training with Accelerate
+While the notebook includes a high-level Trainer implementation, the primary focus is the custom Accelerate loop. This allows for:
 
-## 📖 Implementation Details
+Manual gradient accumulation (8 steps).
 
-### 1️⃣ Data Pipeline
+Gradient clipping for training stability.
 
-- Dataset is **streamed and filtered** to retain only relevant Python data science code.
-- Context length is set to **128 tokens**.
-- Used `return_overflowing_tokens=True` to avoid losing data during truncation.
+Direct control over the optimization step and learning rate scheduler.
 
----
+📊 Results & Inference
+The model's capability is tested via a text-generation pipeline. It can successfully take a natural language comment and generate valid Python code.
 
-### 2️⃣ Custom Weighted Loss
+Input:
 
-To bias the model toward important data science operations, token-level weights are applied when specific keywords appear in the input sequence.
+Python
 
-**Weighted Loss Formula:**
-
-\[
-\text{weighted\_loss} = \alpha \times (1.0 + \text{weights}) \times \text{loss\_per\_token}
-\]
-
-This encourages the model to better learn library usage and common ML workflows.
-
----
-
-### 3️⃣ Training Strategy
-
-Two training approaches are implemented:
-
-#### 🔹 Hugging Face Trainer
-- Automatic handling of:
-  - Training loop
-  - Logging
-  - Evaluation
-- Faster experimentation and cleaner code
-
-#### 🔹 Accelerate Training Loop
-- Full manual control over:
-  - Gradient accumulation (8 steps)
-  - Device placement
-  - Gradient clipping
-- Ideal for understanding the internals of large-scale training
-
----
-
-## 📊 Results
-
-The model was evaluated using **Perplexity**, a standard metric for language models.
-
-- **Pre-training Perplexity:** ~59,413  
-- **Post-training Perplexity:**  
-  Significantly reduced after just **0.01 epochs** of training
-
----
-
-## 🧪 Sample Inference
-
-**Prompt:**
-```python
 # create scatter plot with x, y
+Output:
+
+Python
+
+plt.scatter(x, y, color='red', marker='x')
+💻 Usage
+Clone the Repo: git clone https://github.com/Vidyap13/codeparrot-ds.git
+
+Install Requirements: pip install datasets transformers accelerate torch
+
+Inference: Run the generation cells in the notebook to interact with the trained model.
